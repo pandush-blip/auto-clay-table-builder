@@ -1,0 +1,3 @@
+client,audience_id,audience_name,tier,priority,result_entity,clay_query_draft,max_contacts_per_company,target_people,pause_if_below,pause_if_above,dedupe_scope,not_expressible,proxy_applied,run_notes
+Acme,aud-001,Deep-tech founders,Tier 1,1,people,"select from people where location_country in (""United States"")",3,50000,1000,60000,client,,"industry label mapped to closest enum",first pass
+Acme,aud-002,Semiconductor execs,Tier 2,2,people,"select from people where company.industry in (""Computer Hardware"")",2,25000,,50000,audience,,"","second pass | watch domain fill"

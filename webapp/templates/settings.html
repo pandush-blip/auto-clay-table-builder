@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Settings - Clay Table Builder{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+<div class="card">
+  <h2>Clay</h2>
+  {% if doctor and doctor.ok %}<p class="ok-note">Connected to {{ doctor.workspace_name }} ({{ doctor.workspace_id }}).</p>
+  {% else %}<p class="err-note">Not connected{{ ": " + doctor.error if doctor and doctor.error else "" }}.</p>{% endif %}
+  <p class="muted">Cookie updated: {{ cookie_updated or "never" }}
+    {% if paused %}&middot; queue paused: {{ pause_reason }}{% endif %}</p>
+  <form method="post" action="{{ url_for('settings_resume') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="btn primary" type="submit">Test connection and resume queue</button>
+  </form>
+</div>
+<div class="card">
+  <h2>Query repair</h2>
+  <p class="muted">Rule-based repair is always on. AI repair is
+    {{ "enabled" if llm else "not configured (set OPENAI_API_KEY in webapp/.env)" }}.</p>
+  <form method="post" action="{{ url_for('settings_save') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>OpenAI model<input name="llm_model" value="{{ model or 'gpt-4o-mini' }}"></label>
+    <button class="btn" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Job {{ job.id }} - Clay Table Builder{% endblock %}
+{% block content %}
+<h1>Job {{ job.id }} <span class="chip {{ job.status }}" id="status-chip">{{ job.status }}</span></h1>
+<p class="muted">{{ job.client }} &middot; {{ job.audience_name }} ({{ job.audience_id }}) &middot; priority {{ job.priority }}</p>
+<div class="row gap">
+  <button class="btn" onclick="postForm('/jobs/{{ job.id }}/cancel')">Cancel</button>
+  <button class="btn" onclick="postForm('/jobs/{{ job.id }}/retry')">Retry / resume</button>
+  <a class="btn" href="{{ url_for('queue_page') }}">Back to queue</a>
+</div>
+<div id="error-banner"></div>
+<div class="card"><h2>Tables</h2><div id="tables" class="tables"><span class="muted">waiting for data...</span></div></div>
+<div class="card"><h2>Outputs</h2><div id="outputs"><span class="muted">none yet</span></div></div>
+<div class="card"><h2>Events</h2><div id="events" class="events"></div></div>
+<div class="card"><h2>Live log</h2><pre id="log" class="log">loading...</pre></div>
+{% endblock %}
+{% block scripts %}
+<script>
+const JOB_ID = {{ job.id }};
+async function refreshJob() {
+  let job;
+  try { job = await apiGet('/api/jobs/' + JOB_ID); } catch (e) { return; }
+  document.getElementById('status-chip').className = 'chip ' + job.status;
+  document.getElementById('status-chip').textContent = job.status;
+  document.getElementById('error-banner').innerHTML = job.error
+    ? '<div class="banner error">' + escapeHtml(job.error) + '</div>' : '';
+  const p = job.progress || {};
+  const tables = p.tables || {};
+  const el = document.getElementById('tables');
+  const names = Object.keys(tables);
+  if (p.parent_count) {
+    el.innerHTML = '<p class="muted">found ' + p.parent_count + ' people, effective ' + (p.effective ?? '?') +
+      ', ' + (p.shards_total ?? names.length) + ' table(s)</p>' +
+      names.map(n => { const t = tables[n]; return tableCard(n, t); }).join('');
+  } else if (names.length) {
+    el.innerHTML = names.map(n => tableCard(n, tables[n])).join('');
+  } else { el.innerHTML = '<span class="muted">phase: ' + escapeHtml(p.phase || 'starting') + '</span>'; }
+  const outs = job.outputs || [];
+  document.getElementById('outputs').innerHTML = outs.length
+    ? outs.map(o => '<a class="btn small" href="/jobs/' + JOB_ID + '/download?p=' + encodeURIComponent(o.rel) + '">' +
+        escapeHtml(o.name) + '</a> <span class="muted">' + Math.round(o.size / 1024) + ' KB</span>').join('<br>')
+    : '<span class="muted">none yet</span>';
+  document.getElementById('events').innerHTML = (job.events || []).map(e =>
+    '<div class="event"><span class="muted">' + escapeHtml(e.ts) + '</span> <span class="chip small ' + e.kind + '">' + e.kind + '</span> ' + escapeHtml(e.message) + '</div>').join('');
+  const log = document.getElementById('log');
+  const atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 40;
+  log.textContent = job.log_tail || '(no output yet)';
+  if (atBottom) log.scrollTop = log.scrollHeight;
+}
+function tableCard(name, t) {
+  let detail = [];
+  if (t.rows !== undefined) detail.push(t.rows + ' imported');
+  if (t.exported !== undefined) detail.push(t.exported + ' exported');
+  if (t.fields_done !== undefined) detail.push('columns ' + t.fields_done + '/' + t.fields_total);
+  if (t.export_status) detail.push('export ' + t.export_status);
+  return '<div class="table-card"><div class="row between"><strong>' + escapeHtml(name) + '</strong>' +
+    '<span class="chip small ' + (t.state || '') + '">' + escapeHtml(t.state || '') + '</span></div>' +
+    '<div class="muted">' + (t.id ? 'table ' + escapeHtml(t.id) + ' - ' : '') + escapeHtml(detail.join(' - ')) + '</div></div>';
+}
+refreshJob();
+setInterval(refreshJob, 2000);
+</script>
+{% endblock %}

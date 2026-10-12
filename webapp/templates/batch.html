@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}{{ batch.name }} - Clay Table Builder{% endblock %}
+{% block content %}
+<h1>{{ batch.name }}</h1>
+<p class="muted">{{ client.name }} &middot; imported {{ batch.created_at }} &middot; {{ audiences|length }} audiences
+  &middot; {{ valid_count }} validated &middot; {{ queued_count }} queued/running
+  &middot; AI repair {{ 'enabled' if llm else 'not configured' }}</p>
+
+<div class="row gap">
+  <button class="btn" onclick="validateAll()">Validate all</button>
+  <span id="batch-progress" class="muted"></span>
+  <form method="post" action="{{ url_for('batch_queue', batch_id=batch.id) }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="btn primary" type="submit">Queue validated ({{ valid_count }})</button>
+  </form>
+</div>
+
+<table class="wide">
+  <thead><tr><th>Audience</th><th>Status</th><th>Query</th><th>Check result</th><th></th></tr></thead>
+  <tbody>
+  {% for a in audiences %}
+    <tr id="aud-{{ a.id }}" data-id="{{ a.id }}">
+      <td><strong>{{ a.audience_name }}</strong><div class="muted">{{ a.audience_id }}</div></td>
+      <td><span class="chip {{ a.status }}">{{ a.status }}</span></td>
+      <td class="query-cell">
+        <details>
+          <summary>{{ a.query[:110] }}{% if a.query|length > 110 %}...{% endif %}</summary>
+          <textarea class="q-edit" rows="6">{{ a.edited_query or a.repaired_query or a.query }}</textarea>
+          <button class="btn small" onclick="saveRow({{ a.id }})">Save query + re-validate</button>
+        </details>
+        {% if a.repaired_query %}<div class="ok-note">auto-fixed: {{ a.repair.explanation if a.repair and a.repair.explanation else '' }}</div>{% endif %}
+      </td>
+      <td class="result" id="result-{{ a.id }}">
+        {% if a.api.get('count') is not none %}<div><strong>{{ a.api.get('count') }}</strong> people (preview)</div>{% endif %}
+        {% for w in a.api.get('warnings', []) %}<div class="warn-note">{{ w }}</div>{% endfor %}
+        {% for e in a.api.get('errors', []) %}<div class="err-note">{{ e }}</div>{% endfor %}
+        {% if a.api.get('top_titles') %}<div class="muted">titles: {{ a.api.get('top_titles')|join(', ') }}</div>{% endif %}
+        {% if a.api.get('top_companies') %}<div class="muted">companies: {{ a.api.get('top_companies')|join(', ') }}</div>{% endif %}
+        {% if a.preview_count is not none and a.api.get('count') is none %}<div>{{ a.preview_count }} people</div>{% endif %}
+      </td>
+      <td class="actions">
+        <button class="btn small" onclick="validateRow({{ a.id }})">Validate</button>
+        {% if a.status == 'invalid' %}<button class="btn small" onclick="fixRow({{ a.id }})">Auto-fix</button>{% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+{% block scripts %}
+<script>
+async function validateRow(id) {
+  const cell = document.getElementById('result-' + id);
+  cell.innerHTML = '<span class="muted">checking - official API + preview...</span>';
+  try {
+    const data = await apiPost('/audiences/' + id + '/validate', {});
+    renderResult(id, data);
+  } catch (e) { cell.innerHTML = '<span class="err-note">' + e + '</span>'; }
+}
+async function fixRow(id) {
+  const cell = document.getElementById('result-' + id);
+  cell.innerHTML = '<span class="muted">repairing (rule-based + AI, re-validating)...</span>';
+  try {
+    const data = await apiPost('/audiences/' + id + '/fix', {});
+    if (data.ok) { cell.innerHTML = '<span class="ok-note">fixed (' + data.source + '): ' + escapeHtml(data.explanation) + '</span>'; setTimeout(() => location.reload(), 1200); }
+    else { cell.innerHTML = '<span class="err-note">' + escapeHtml(data.message || 'repair failed') + '</span>'; }
+  } catch (e) { cell.innerHTML = '<span class="err-note">' + e + '</span>'; }
+}
+async function saveRow(id) {
+  const row = document.getElementById('aud-' + id);
+  const query = row.querySelector('.q-edit').value;
+  const cell = document.getElementById('result-' + id);
+  cell.innerHTML = '<span class="muted">saving + validating...</span>';
+  try { const data = await apiPost('/audiences/' + id + '/query', { query }); renderResult(id, data); }
+  catch (e) { cell.innerHTML = '<span class="err-note">' + e + '</span>'; }
+}
+let validateTimer = null;
+async function validateAll() {
+  const progress = document.getElementById('batch-progress');
+  progress.textContent = 'starting validation...';
+  const data = await apiPost('/batches/{{ batch.id }}/validate', {});
+  if (!data.ok) { progress.textContent = (data.errors || ['could not start']).join(', '); return; }
+  pollValidateAll();
+}
+async function pollValidateAll() {
+  const progress = document.getElementById('batch-progress');
+  let state;
+  try { state = await apiGet('/batches/{{ batch.id }}/validate'); }
+  catch (e) { progress.textContent = 'status check failed: ' + e; return; }
+  const results = state.results || {};
+  Object.entries(results).forEach(([id, entry]) => {
+    const chip = document.querySelector('#aud-' + id + ' .chip');
+    if (chip) { chip.textContent = entry.status || (entry.ok ? 'valid' : 'invalid'); chip.className = 'chip ' + chip.textContent; }
+    const cell = document.getElementById('result-' + id);
+    if (cell) cell.innerHTML = renderEntry(entry);
+  });
+  const done = state.done || 0;
+  const total = state.total || 0;
+  const retries = Object.values(results).filter(r => (r.warnings || []).some(w => /retried/i.test(w))).length;
+  progress.textContent = 'validating ' + done + '/' + total +
+    (retries ? ' - ' + retries + ' row(s) hit Clay busy and were retried' : '');
+  if (state.running) { clearTimeout(validateTimer); validateTimer = setTimeout(pollValidateAll, 2000); }
+  else {
+    const s = state.summary || {};
+    progress.textContent = 'done: ' + (s.valid || 0) + ' valid, ' + (s.repaired || 0) + ' auto-fixed, ' + (s.invalid || 0) + ' need attention';
+  }
+}
+function renderEntry(entry) {
+  let html = '';
+  if (entry.count !== undefined && entry.count !== null) html += '<div><strong>' + entry.count + '</strong> people (preview)</div>';
+  if (entry.repaired && entry.explanation) html += '<div class="ok-note">auto-fixed: ' + escapeHtml(entry.explanation) + '</div>';
+  (entry.warnings || []).forEach(w => html += '<div class="warn-note">' + escapeHtml(w) + '</div>');
+  (entry.errors || []).forEach(e => html += '<div class="err-note">' + escapeHtml(e) + '</div>');
+  return html || '<span class="muted">no result</span>';
+}
+function renderResult(id, data) {
+  const cell = document.getElementById('result-' + id);
+  let html = '';
+  if (data.count !== undefined && data.count !== null) html += '<div><strong>' + data.count + '</strong> people (preview)</div>';
+  (data.warnings || []).forEach(w => html += '<div class="warn-note">' + escapeHtml(w) + '</div>');
+  (data.errors || []).forEach(e => html += '<div class="err-note">' + escapeHtml(e) + '</div>');
+  if (data.top_titles) html += '<div class="muted">titles: ' + escapeHtml(data.top_titles.join(', ')) + '</div>';
+  if (data.top_companies) html += '<div class="muted">companies: ' + escapeHtml(data.top_companies.join(', ')) + '</div>';
+  if (!html) html = '<span class="muted">no result</span>';
+  cell.innerHTML = html;
+  const chip = document.querySelector('#aud-' + id + ' .chip');
+  if (chip) { chip.textContent = data.ok ? 'valid' : 'invalid'; chip.className = 'chip ' + (data.ok ? 'valid' : 'invalid'); }
+}
+</script>
+{% endblock %}

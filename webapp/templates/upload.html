@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}New batch - Clay Table Builder{% endblock %}
+{% block content %}
+<h1>New batch</h1>
+<div class="card narrow">
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Client
+      <select name="client_id" required>
+        <option value="">- choose -</option>
+        {% for c in clients %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Batch name (optional)<input name="batch_name" placeholder="e.g. Acme week 40"></label>
+    <label>CSV file<input type="file" name="file" accept=".csv,text/csv" required></label>
+    <p class="muted">Required columns: the Clay query and the audience name. Accepted names include
+      <code>clay_query_draft</code> / <code>clay search people queries</code> / <code>query</code> and
+      <code>audience_name</code> / <code>audience</code> / <code>list name</code>.
+      Optional: <code>target_people</code>, <code>priority</code>, <code>tier</code>, <code>dedupe_scope</code>.</p>
+    <button class="btn primary" type="submit">Import</button>
+  </form>
+  {% if not clients %}<p class="warn-note">Create a client first under <a href="{{ url_for('clients') }}">Clients</a>.</p>{% endif %}
+</div>
+{% endblock %}

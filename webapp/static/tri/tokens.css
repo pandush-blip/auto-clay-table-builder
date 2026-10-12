@@ -1,0 +1,286 @@
+/* tri-design 2.0.7 - generated from tokens/tokens.json. Do not edit. */
+:root {
+  /* violet ramp */
+  --tri-violet-50: #F5EFFE;
+  --tri-violet-100: #EBDFFD;
+  --tri-violet-200: #D9C2FA;
+  --tri-violet-300: #BF97F4;
+  --tri-violet-400: #A46BEE;
+  --tri-violet-500: #8A40EA;
+  --tri-violet-600: #7430CE;
+  --tri-violet-700: #4B1D8F;
+  --tri-violet-800: #33125F;
+  --tri-violet-900: #1F0B3B;
+
+  /* typography */
+  --tri-font-display: "Poppins", "Poppins Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tri-font-ui: "IBM Plex Sans", "IBM Plex Sans Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tri-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --tri-text-2xs: 10.5px;
+  --tri-text-2xs-line: 1.35;
+  --tri-text-xs: 11.5px;
+  --tri-text-xs-line: 1.4;
+  --tri-text-sm: 12.5px;
+  --tri-text-sm-line: 1.45;
+  --tri-text-base: 13.5px;
+  --tri-text-base-line: 1.5;
+  --tri-text-lg: 15px;
+  --tri-text-lg-line: 1.45;
+  --tri-text-xl: 19px;
+  --tri-text-xl-line: 1.3;
+  --tri-text-2xl: 21px;
+  --tri-text-2xl-line: 1.25;
+  --tri-text-3xl: 25px;
+  --tri-text-3xl-line: 1.15;
+  --tri-text-4xl: 33px;
+  --tri-text-4xl-line: 1.05;
+  --tri-weight-regular: 400;
+  --tri-weight-medium: 500;
+  --tri-weight-semibold: 600;
+  --tri-weight-bold: 700;
+  --tri-tracking-display: -0.01em;
+  --tri-tracking-normal: 0;
+  --tri-tracking-wide: 0.02em;
+  --tri-numeric-variant: tabular-nums;
+  --tri-numeric-features: "tnum" 1, "lnum" 1;
+
+  /* space */
+  --tri-space-0: 0;
+  --tri-space-1: 2px;
+  --tri-space-2: 4px;
+  --tri-space-3: 6px;
+  --tri-space-4: 8px;
+  --tri-space-5: 10px;
+  --tri-space-6: 12px;
+  --tri-space-8: 16px;
+  --tri-space-10: 20px;
+  --tri-space-12: 24px;
+  --tri-space-16: 32px;
+  --tri-space-20: 40px;
+  --tri-space-24: 48px;
+  --tri-space-32: 64px;
+
+  /* radius / border */
+  --tri-radius-track: 2px;
+  --tri-radius-control: 3px;
+  --tri-radius-chip: 4px;
+  --tri-radius-mark: 4px;
+  --tri-radius-panel: 6px;
+  --tri-radius-pill: 999px;
+  --tri-border-hairline: 1px;
+  --tri-border-thick: 2px;
+
+  /* elevation */
+  --tri-shadow-overlay: 0 8px 24px rgba(22, 18, 31, 0.10), 0 0 0 1px #E4E0EA;
+
+  /* motion */
+  --tri-duration-fast: 120ms;
+  --tri-duration-base: 160ms;
+  --tri-duration-slow: 220ms;
+  --tri-ease-out: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --tri-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* z-index */
+  --tri-z-base: 0;
+  --tri-z-sticky: 10;
+  --tri-z-dropdown: 1000;
+  --tri-z-overlay: 1100;
+  --tri-z-modal: 1200;
+  --tri-z-toast: 1300;
+  --tri-z-tooltip: 1400;
+  --tri-z-command: 1500;
+
+  /* breakpoints */
+  --tri-bp-sm: 640px;
+  --tri-bp-md: 768px;
+  --tri-bp-lg: 1024px;
+  --tri-bp-xl: 1280px;
+  --tri-bp-2xl: 1536px;
+
+  /* layout */
+  --tri-sidebar-width: 236px;
+  --tri-sidebar-width-compact: 216px;
+  --tri-topbar-height: 56px;
+  --tri-topbar-height-compact: 52px;
+  --tri-reading-max: 760px;
+}
+
+/* --- light (default) --- */
+:root {
+  /* colour roles */
+  --tri-paper: #FBFAFD;
+  --tri-surface: #FFFFFF;
+  --tri-sunken: #F4F2F8;
+  --tri-line: #E4E0EA;
+  --tri-line-strong: #CFC9D8;
+  --tri-control-border: #8A8295;
+  --tri-ink: #16121F;
+  --tri-ink-2: #5E5766;
+  --tri-ink-3: #6E6779;
+  --tri-violet-text: #4B1D8F;
+  --tri-violet-action: #8A40EA;
+  --tri-violet-action-hover: #7430CE;
+  --tri-violet-tint: #F1E8FD;
+  --tri-violet-tint-strong: #E2D2FB;
+  --tri-on-violet: #FFFFFF;
+  --tri-success-text: #1F7A4D;
+  --tri-success-bg: #E9F5EE;
+  --tri-warning-text: #8A5A00;
+  --tri-warning-bg: #FBF0DC;
+  --tri-danger-text: #B3261E;
+  --tri-danger-bg: #FBE9E7;
+  --tri-danger-action: #B3261E;
+  --tri-on-danger: #FFFFFF;
+  --tri-info-text: #1F5AA8;
+  --tri-info-bg: #E8F1FB;
+  --tri-focus: #8A40EA;
+  --tri-scrim: rgba(22, 18, 31, 0.42);
+  --tri-chart-1: #8A40EA;
+  --tri-chart-2: #1F5AA8;
+  --tri-chart-3: #1F7A4D;
+  --tri-chart-4: #8A5A00;
+  --tri-chart-5: #6E6779;
+
+  color-scheme: light;
+  --tri-shadow-overlay: 0 8px 24px rgba(22, 18, 31, 0.10), 0 0 0 1px #E4E0EA;
+}
+
+/* --- dark, following the OS unless the app pins a theme --- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  /* colour roles */
+  --tri-paper: #0F0C15;
+  --tri-surface: #17131E;
+  --tri-sunken: #1D1826;
+  --tri-line: #2A2433;
+  --tri-line-strong: #3B3447;
+  --tri-control-border: #6F6A7C;
+  --tri-ink: #F2EFF6;
+  --tri-ink-2: #A9A1B3;
+  --tri-ink-3: #918A9E;
+  --tri-violet-text: #B78BF7;
+  --tri-violet-action: #8A40EA;
+  --tri-violet-action-hover: #A46BEE;
+  --tri-violet-tint: #241A3A;
+  --tri-violet-tint-strong: #2F2149;
+  --tri-on-violet: #FFFFFF;
+  --tri-success-text: #4CC38A;
+  --tri-success-bg: #152620;
+  --tri-warning-text: #E0A45C;
+  --tri-warning-bg: #2A2113;
+  --tri-danger-text: #F0736A;
+  --tri-danger-bg: #2C1717;
+  --tri-danger-action: #B3352C;
+  --tri-on-danger: #FFFFFF;
+  --tri-info-text: #7FB0F5;
+  --tri-info-bg: #161F2E;
+  --tri-focus: #B78BF7;
+  --tri-scrim: rgba(6, 4, 10, 0.60);
+  --tri-chart-1: #A46BEE;
+  --tri-chart-2: #7FB0F5;
+  --tri-chart-3: #4CC38A;
+  --tri-chart-4: #E0A45C;
+  --tri-chart-5: #918A9E;
+
+  color-scheme: dark;
+  --tri-shadow-overlay: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px #3B3447;
+  }
+}
+
+/* --- explicit themes (data-theme, plus .dark for shadcn-style apps) --- */
+:root[data-theme="light"] {
+  /* colour roles */
+  --tri-paper: #FBFAFD;
+  --tri-surface: #FFFFFF;
+  --tri-sunken: #F4F2F8;
+  --tri-line: #E4E0EA;
+  --tri-line-strong: #CFC9D8;
+  --tri-control-border: #8A8295;
+  --tri-ink: #16121F;
+  --tri-ink-2: #5E5766;
+  --tri-ink-3: #6E6779;
+  --tri-violet-text: #4B1D8F;
+  --tri-violet-action: #8A40EA;
+  --tri-violet-action-hover: #7430CE;
+  --tri-violet-tint: #F1E8FD;
+  --tri-violet-tint-strong: #E2D2FB;
+  --tri-on-violet: #FFFFFF;
+  --tri-success-text: #1F7A4D;
+  --tri-success-bg: #E9F5EE;
+  --tri-warning-text: #8A5A00;
+  --tri-warning-bg: #FBF0DC;
+  --tri-danger-text: #B3261E;
+  --tri-danger-bg: #FBE9E7;
+  --tri-danger-action: #B3261E;
+  --tri-on-danger: #FFFFFF;
+  --tri-info-text: #1F5AA8;
+  --tri-info-bg: #E8F1FB;
+  --tri-focus: #8A40EA;
+  --tri-scrim: rgba(22, 18, 31, 0.42);
+  --tri-chart-1: #8A40EA;
+  --tri-chart-2: #1F5AA8;
+  --tri-chart-3: #1F7A4D;
+  --tri-chart-4: #8A5A00;
+  --tri-chart-5: #6E6779;
+
+  color-scheme: light;
+  --tri-shadow-overlay: 0 8px 24px rgba(22, 18, 31, 0.10), 0 0 0 1px #E4E0EA;
+}
+
+:root[data-theme="dark"], .dark {
+  /* colour roles */
+  --tri-paper: #0F0C15;
+  --tri-surface: #17131E;
+  --tri-sunken: #1D1826;
+  --tri-line: #2A2433;
+  --tri-line-strong: #3B3447;
+  --tri-control-border: #6F6A7C;
+  --tri-ink: #F2EFF6;
+  --tri-ink-2: #A9A1B3;
+  --tri-ink-3: #918A9E;
+  --tri-violet-text: #B78BF7;
+  --tri-violet-action: #8A40EA;
+  --tri-violet-action-hover: #A46BEE;
+  --tri-violet-tint: #241A3A;
+  --tri-violet-tint-strong: #2F2149;
+  --tri-on-violet: #FFFFFF;
+  --tri-success-text: #4CC38A;
+  --tri-success-bg: #152620;
+  --tri-warning-text: #E0A45C;
+  --tri-warning-bg: #2A2113;
+  --tri-danger-text: #F0736A;
+  --tri-danger-bg: #2C1717;
+  --tri-danger-action: #B3352C;
+  --tri-on-danger: #FFFFFF;
+  --tri-info-text: #7FB0F5;
+  --tri-info-bg: #161F2E;
+  --tri-focus: #B78BF7;
+  --tri-scrim: rgba(6, 4, 10, 0.60);
+  --tri-chart-1: #A46BEE;
+  --tri-chart-2: #7FB0F5;
+  --tri-chart-3: #4CC38A;
+  --tri-chart-4: #E0A45C;
+  --tri-chart-5: #918A9E;
+
+  color-scheme: dark;
+  --tri-shadow-overlay: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px #3B3447;
+}
+
+/* --- density --- */
+:root, [data-density="comfortable"] {
+  --tri-density: comfortable;
+  --tri-row-height: 42px;
+  --tri-cell-pad-y: 10px;
+  --tri-cell-pad-x: 12px;
+  --tri-control-height: 32px;
+  --tri-ui-size: 13.5px;
+}
+
+[data-density="compact"] {
+  --tri-density: compact;
+  --tri-row-height: 34px;
+  --tri-cell-pad-y: 6px;
+  --tri-cell-pad-x: 10px;
+  --tri-control-height: 28px;
+  --tri-ui-size: 12.5px;
+}

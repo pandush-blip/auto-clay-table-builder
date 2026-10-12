@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Users - Clay Table Builder{% endblock %}
+{% block content %}
+<h1>Users</h1>
+<div class="card narrow">
+  <h2>Add user</h2>
+  <form method="post" action="{{ url_for('users_save') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Email<input type="email" name="email" required></label>
+    <label>Password<input type="password" name="password" required></label>
+    <label class="check"><input type="checkbox" name="is_admin"> Admin</label>
+    <button class="btn primary" type="submit">Create</button>
+  </form>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Email</th><th>Admin</th><th>Created</th><th></th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr><td>{{ u.email }}</td><td>{{ "yes" if u.is_admin else "no" }}</td><td class="muted">{{ u.created_at }}</td>
+        <td><form method="post" action="{{ url_for('users_delete', user_id=u.id) }}">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="btn small" type="submit">Delete</button></form></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

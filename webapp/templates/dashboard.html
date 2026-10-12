@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Clay Table Builder{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+{% if paused %}
+  <div class="banner error">Queue paused: {{ pause_reason or "Clay connection needs attention" }}.
+    <a href="{{ url_for('connect') }}">Open Connection</a></div>
+{% endif %}
+
+<div class="card">
+  <div class="row between">
+    <h2>Clay connection</h2>
+    <a class="btn" href="{{ url_for('connect') }}">Manage</a>
+  </div>
+  {% if doctor and doctor.ok %}
+    <p class="ok-note">Connected to {{ doctor.workspace_name }} (workspace {{ doctor.workspace_id }}) -
+      row cap {{ doctor.row_cap }}, credits {{ doctor.credits }}, actions {{ doctor.action_credits }}.</p>
+    <p class="muted">Last check: {{ doctor.checked_at }} - cookie updated {{ doctor.cookie_updated_at }}</p>
+  {% else %}
+    <p class="err-note">Not connected{{ ": " + doctor.error if doctor and doctor.error else "" }}.</p>
+  {% endif %}
+</div>
+
+<div class="stats">
+  <div class="stat"><span>{{ stats.queued }}</span><label>Queued</label></div>
+  <div class="stat"><span>{{ stats.running }}</span><label>Running</label></div>
+  <div class="stat"><span>{{ stats.done }}</span><label>Done</label></div>
+  <div class="stat"><span>{{ stats.failed }}</span><label>Failed</label></div>
+</div>
+
+<div class="card">
+  <div class="row between"><h2>Recent jobs</h2><a class="btn" href="{{ url_for('queue_page') }}">Open queue</a></div>
+  <table>
+    <thead><tr><th>#</th><th>Client</th><th>Audience</th><th>Status</th><th>Started</th><th>Error</th></tr></thead>
+    <tbody>
+    {% for job in recent %}
+      <tr>
+        <td><a href="{{ url_for('job_page', job_id=job.id) }}">{{ job.id }}</a></td>
+        <td>{{ job.client_name }}</td>
+        <td>{{ job.audience_name }}</td>
+        <td><span class="chip {{ job.status }}">{{ job.status }}</span></td>
+        <td class="muted">{{ job.started_at or "" }}</td>
+        <td class="muted">{{ (job.error or "")[:90] }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">No jobs yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="row between"><h2>Batches</h2><a class="btn primary" href="{{ url_for('upload') }}">Upload CSV</a></div>
+  <table>
+    <thead><tr><th>#</th><th>Client</th><th>Batch</th><th>Audiences</th><th>Created</th></tr></thead>
+    <tbody>
+    {% for b in batches %}
+      <tr>
+        <td><a href="{{ url_for('batch', batch_id=b.id) }}">{{ b.id }}</a></td>
+        <td>{{ b.client_name }}</td>
+        <td>{{ b.name }}</td>
+        <td>{{ b.audiences }}</td>
+        <td class="muted">{{ b.created_at }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">No batches imported yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

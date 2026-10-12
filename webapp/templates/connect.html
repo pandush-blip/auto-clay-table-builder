@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Connection - Clay Table Builder{% endblock %}
+{% block content %}
+<h1>Clay connection</h1>
+
+<div class="card">
+  <h2>Status</h2>
+  {% if doctor and doctor.ok %}
+    <p class="ok-note">Connected to {{ doctor.workspace_name }} (workspace {{ doctor.workspace_id }}).</p>
+    <table class="kv">
+      <tr><td>Row cap per table</td><td>{{ doctor.row_cap }}</td></tr>
+      <tr><td>Data credits</td><td>{{ doctor.credits }}</td></tr>
+      <tr><td>Action credits</td><td>{{ doctor.action_credits }}</td></tr>
+      <tr><td>Last checked</td><td>{{ doctor.checked_at }}</td></tr>
+      <tr><td>Cookie updated</td><td>{{ doctor.cookie_updated_at or cookie_updated }}</td></tr>
+    </table>
+  {% else %}
+    <p class="err-note">Not connected{{ ": " + doctor.error if doctor and doctor.error else "" }}.</p>
+  {% endif %}
+  {% if paused %}<p class="warn-note">Queue paused: {{ pause_reason }}</p>{% endif %}
+  <form method="post" action="{{ url_for('connect_test') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="btn primary" type="submit">Test connection</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Update the Clay session</h2>
+  <p class="muted">
+    Log in to Clay in Chrome on a computer, open DevTools &gt; Application &gt; Cookies &gt;
+    <code>https://api.clay.com</code>, copy the <code>claysession</code> value, and paste it below
+    (or paste the whole <code>claysession=...</code> cookie).
+  </p>
+  <form method="post" action="{{ url_for('connect_cookie') }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>claysession cookie
+      <textarea name="cookie" rows="4" placeholder="claysession=..." required></textarea>
+    </label>
+    <button class="btn primary" type="submit">Save and verify</button>
+  </form>
+  <p class="muted">{% if has_cookie %}A cookie is stored (encrypted).{% else %}No cookie stored yet.{% endif %}
+    {% if cookie_updated %}Last updated {{ cookie_updated }}.{% endif %}</p>
+</div>
+{% endblock %}

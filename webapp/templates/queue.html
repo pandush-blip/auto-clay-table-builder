@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Queue - Clay Table Builder{% endblock %}
+{% block content %}
+<h1>Queue</h1>
+{% if paused %}<div class="banner error">Queue paused: {{ pause_reason }}. <a href="{{ url_for('connect') }}">Reconnect Clay</a></div>{% endif %}
+<p class="muted">One build runs at a time, in priority order. This page refreshes every 3 seconds.</p>
+<table class="wide">
+  <thead><tr><th>#</th><th>Status</th><th>Prio</th><th>Client</th><th>Audience</th><th>Phase</th><th>Started</th><th>Error</th><th></th></tr></thead>
+  <tbody id="jobs-body"><tr><td colspan="9" class="muted">Loading...</td></tr></tbody>
+</table>
+{% endblock %}
+{% block scripts %}
+<script>
+async function refresh() {
+  const jobs = await apiGet('/api/jobs');
+  const body = document.getElementById('jobs-body');
+  if (!jobs.length) { body.innerHTML = '<tr><td colspan="9" class="muted">No jobs yet.</td></tr>'; return; }
+  body.innerHTML = jobs.map(j => {
+    let actions = '<a class="btn small" href="/jobs/' + j.id + '">Open</a> ';
+    if (j.status === 'running') actions += '<button class="btn small" onclick="postForm(\'/jobs/' + j.id + '/cancel\')">Cancel</button>';
+    if (j.status === 'queued') actions += '<button class="btn small" onclick="postForm(\'/jobs/' + j.id + '/cancel\')">Remove</button>';
+    if (j.status === 'failed' || j.status === 'needs_session' || j.status === 'canceled')
+      actions += '<button class="btn small" onclick="postForm(\'/jobs/' + j.id + '/retry\')">Retry</button>';
+    const retryNote = j.resume_of ? '<div class="muted">retry of #' + j.resume_of + '</div>' : '';
+    return '<tr><td><a href="/jobs/' + j.id + '">' + j.id + '</a>' + retryNote + '</td>' +
+      '<td><span class="chip ' + j.status + '">' + j.status + '</span></td>' +
+      '<td>' + j.priority + '</td><td>' + escapeHtml(j.client) + '</td>' +
+      '<td>' + escapeHtml(j.audience_name) + '<div class="muted">' + escapeHtml(j.audience_id) + '</div></td>' +
+      '<td>' + escapeHtml(j.phase || '') + '</td><td class="muted">' + escapeHtml(j.started_at || '') + '</td>' +
+      '<td class="muted">' + escapeHtml((j.error || '').slice(0, 80)) + '</td><td>' + actions + '</td></tr>';
+  }).join('');
+}
+refresh();
+setInterval(refresh, 3000);
+</script>
+{% endblock %}

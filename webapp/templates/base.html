@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Clay Table Builder{% endblock %}</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='tri/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='tri/fonts.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body{% if not user %} class="auth"{% endif %}>
+{% if user %}
+<header class="topbar">
+  <a class="brand" href="{{ url_for('dashboard') }}"><span class="mark">RI</span><span><b>The Revenue Inbox</b><small>Clay Table Builder</small></span></a>
+  <div class="topbar-right">
+    <nav class="switcher">
+      <a href="https://performance.therevenueinbox.com">Performance</a>
+      <a href="https://enrichment.therevenueinbox.com">Enrichment</a>
+      <a href="https://harvester.therevenueinbox.com">Harvester</a>
+      <a href="https://launcher.therevenueinbox.com">Launcher</a>
+      <a class="active" href="https://claybuilder.therevenueinbox.com">Claybuilder</a>
+    </nav>
+    <div class="account">
+      <span class="who">{{ user.email }}</span>
+      <form method="post" action="{{ url_for('logout') }}" class="inline">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="signout" type="submit">Log out</button>
+      </form>
+    </div>
+  </div>
+</header>
+<div class="app-shell">
+  <aside class="sidebar">
+    <nav class="section-nav">
+      <a class="navlink {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span class="nav-icon">D</span><span><strong>Dashboard</strong><small>Connection and totals</small></span></a>
+      <a class="navlink {% if request.endpoint == 'upload' %}active{% endif %}" href="{{ url_for('upload') }}"><span class="nav-icon">N</span><span><strong>New batch</strong><small>Upload and prepare tables</small></span></a>
+      <a class="navlink {% if request.endpoint in ['queue_page', 'batch', 'job_page'] %}active{% endif %}" href="{{ url_for('queue_page') }}"><span class="nav-icon">Q</span><span><strong>Queue</strong><small>Running and finished jobs</small></span></a>
+      <a class="navlink {% if request.endpoint == 'clients' %}active{% endif %}" href="{{ url_for('clients') }}"><span class="nav-icon">C</span><span><strong>Clients</strong><small>Saved client settings</small></span></a>
+      <a class="navlink {% if request.endpoint == 'connect' %}active{% endif %}" href="{{ url_for('connect') }}"><span class="nav-icon">X</span><span><strong>Connection</strong><small>Clay workspace and cookie</small></span></a>
+      {% if is_admin() %}
+      <a class="navlink {% if request.endpoint == 'users' %}active{% endif %}" href="{{ url_for('users') }}"><span class="nav-icon">U</span><span><strong>Users</strong><small>Who can sign in</small></span></a>
+      <a class="navlink {% if request.endpoint == 'settings_page' %}active{% endif %}" href="{{ url_for('settings_page') }}"><span class="nav-icon">S</span><span><strong>Settings</strong><small>Pace and table limits</small></span></a>
+      {% endif %}
+    </nav>
+    <div class="side-card">
+      <strong>Drafts stay in Clay</strong>
+      Tables are created as drafts; nothing is published from here.
+    </div>
+  </aside>
+  <main class="wrap">
+{% else %}
+<main class="wrap">
+{% endif %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+{% if user %}</div>{% endif %}
+<script>window.CSRF = {{ csrf_token()|tojson }};</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
